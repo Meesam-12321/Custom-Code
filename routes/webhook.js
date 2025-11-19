@@ -301,6 +301,61 @@ async function addTags(contactId, classification, locationId) {
   }
 }
 
+// AI Test endpoint - Just test AI responses without webhook complexity
+router.post('/ai-test', async (req, res) => {
+  try {
+    const message = req.body.message || req.body.query || "Samsung s21 battery replacement";
+    
+    console.log(`🤖 Testing AI response for: "${message}"`);
+    
+    // Mock contact info for testing
+    const mockContactInfo = {
+      contact_id: "ai_test_user",
+      full_name: "Test User",
+      phone: "+1234567890",
+      channel: "test"
+    };
+    
+    // Get AI response directly
+    const aiResult = await SimplifiedAIService.processMessage(
+      message,
+      'text', // message type
+      null,   // no media URL
+      null,   // no pricing data needed
+      mockContactInfo
+    );
+    
+    // Return clean response for testing
+    res.json({
+      success: true,
+      query: message,
+      ai_response: aiResult.customer_response,
+      classification: aiResult.classification,
+      products_found: aiResult.pricing_items_found,
+      matched_products: aiResult.matched_products?.map(p => ({
+        name: p.Producto,
+        price: p['PUBLICO TIENDA'] || 'N/A',
+        similarity: p._similarity ? (p._similarity * 100).toFixed(1) + '%' : undefined
+      })) || [],
+      intent_detection: {
+        model_detected: aiResult.classification?.device_model,
+        brand_detected: aiResult.classification?.device_brand,
+        part_detected: aiResult.classification?.service_type,
+        is_greeting: aiResult.is_simple_greeting
+      },
+      timestamp: new Date().toISOString()
+    });
+    
+  } catch (error) {
+    console.error('❌ AI Test error:', error);
+    res.status(500).json({ 
+      success: false,
+      error: error.message,
+      query: req.body.message || 'unknown'
+    });
+  }
+});
+
 // Test endpoint
 router.post('/test', async (req, res) => {
   console.log('🧪 Test webhook received:', req.body);
