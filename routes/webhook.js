@@ -304,7 +304,7 @@ async function addTags(contactId, classification, locationId) {
 // AI Test endpoint - Just test AI responses without webhook complexity
 router.post('/ai-test', async (req, res) => {
   try {
-    const message = req.body.message || req.body.query || "Samsung s21 battery replacement";
+    const message = req.body.message || req.body.query;
     
     console.log(`🤖 Testing AI response for: "${message}"`);
     
