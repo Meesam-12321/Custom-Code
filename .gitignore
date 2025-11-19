@@ -1,0 +1,7 @@
+node_modules/
+*.log
+.env
+vector-cache.json
+embeddings-cache.json
+*.cache
+conversation-memory/
