@@ -304,14 +304,28 @@ async function addTags(contactId, classification, locationId) {
 // AI Test endpoint - Just test AI responses without webhook complexity
 router.post('/ai-test', async (req, res) => {
   try {
+    console.log('📥 Raw request body:', JSON.stringify(req.body, null, 2));
+    
     const message = req.body.message || req.body.query;
+    
+    console.log(`🔍 Extracted message: "${message}"`);
+    console.log(`🔍 Message type: ${typeof message}`);
+    console.log(`🔍 Message length: ${message?.length || 0}`);
+    
+    if (!message || message.trim() === '') {
+      return res.status(400).json({
+        success: false,
+        error: 'No message provided in request body',
+        received_body: req.body
+      });
+    }
     
     console.log(`🤖 Testing AI response for: "${message}"`);
     
     // Mock contact info for testing
     const mockContactInfo = {
       contact_id: "ai_test_user",
-      full_name: "Test User",
+      full_name: "Test User", 
       phone: "+1234567890",
       channel: "test"
     };
@@ -324,6 +338,13 @@ router.post('/ai-test', async (req, res) => {
       null,   // no pricing data needed
       mockContactInfo
     );
+    
+    console.log('✅ AI processing completed');
+    console.log('📊 AI Result:', {
+      response_length: aiResult.customer_response?.length,
+      products_found: aiResult.pricing_items_found,
+      classification: aiResult.classification
+    });
     
     // Return clean response for testing
     res.json({
@@ -351,7 +372,8 @@ router.post('/ai-test', async (req, res) => {
     res.status(500).json({ 
       success: false,
       error: error.message,
-      query: req.body.message || 'unknown'
+      stack: error.stack,
+      query: req.body.message || req.body.query || 'unknown'
     });
   }
 });
